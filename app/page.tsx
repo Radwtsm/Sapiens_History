@@ -11,10 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useTheme } from "next-themes";
 
-import { Button } from "@/components/ui/button";
-// import { Select } from "@radix-ui/react-select";
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -30,19 +27,10 @@ export default function Home() {
   );
 
 
-  const { setTheme } = useTheme()
-  // setTheme("dark")
 
   return (
     <div>
-      <h1>Historical Timeline</h1>
-      {/* <Select>
-
-      </Select> */}
-      {/* <Button>ciao</Button> */}
-
-
-
+      <h1 className="text-5xl">Historical Timeline</h1>
       <Select onValueChange={(val)=> setSelectedCategory(val)}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="SELECT" />
@@ -54,28 +42,9 @@ export default function Home() {
             {category}
           </SelectItem>
         ))}
-          {/* <SelectItem value="light">Light</SelectItem>
-          <SelectItem value="dark">Dark</SelectItem>
-          <SelectItem value="system">System</SelectItem> */}
         </SelectContent>
       </Select>
 
-
-
-      {/* Dropdown for selecting category */}
-      {/* <select
-        onChange={(e) => setSelectedCategory(e.target.value || null)}
-        value={selectedCategory || ""}
-      >
-        <option value="">All Categories</option>
-        {uniqueCategories.map((category) => (
-          <option key={category} value={category}>
-            {category}
-          </option>
-        ))}
-      </select> */}
-
-      {/* Timeline Component */}
       <TimelineComponent events={filteredEvents} />
     </div>
   );
