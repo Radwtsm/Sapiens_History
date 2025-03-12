@@ -3,7 +3,6 @@
 import { useState } from "react";
 import TimelineComponent from "./Timeline";
 import { events as RawEvents } from "./events";
-// import { Select } from "@radix-ui/react-select";
 import {
   Select,
   SelectContent,

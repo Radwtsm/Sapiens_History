@@ -3,6 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Timeline, DataSet } from "vis-timeline/standalone";
 import "vis-timeline/styles/vis-timeline-graph2d.min.css";
+// import Map from "./Map";
+import dynamic from "next/dynamic";
+
+
+
+const Map = dynamic(() => import("./Map"), { ssr: false });
 
 
 type TimelineEvent = {
@@ -82,6 +88,7 @@ const TimelineComponent = ({ events }: TimelineProps) => {
         <h1 className="text-white text-3xl">{title}</h1>
         <p>{description}</p>
     </div>
+    <Map/>
     </>;
 };
 
