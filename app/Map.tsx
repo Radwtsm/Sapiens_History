@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import { Polyline } from "react-leaflet";
 import L from "leaflet";
