@@ -3,93 +3,156 @@
 import { useEffect, useRef, useState } from "react";
 import { Timeline, DataSet } from "vis-timeline/standalone";
 import "vis-timeline/styles/vis-timeline-graph2d.min.css";
-// import Map from "./Map";
 import dynamic from "next/dynamic";
+// import Resizabl
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable"
+import { Separator } from "@/components/ui/separator"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+
 
 
 
 const Map = dynamic(() => import("./Map"), { ssr: false });
 
-
 type TimelineEvent = {
   id: number;
   content: string;
-  start: string; // ✅ Changed from string to number for BCE handling
+  start: string;
   end?: string;
-  description?:string
+  description?: string;
+  position?: [number, number]; // ✅ Added position attribute [lat, lng]
+  path?:[number, number][]
 };
 
 type TimelineProps = {
   events: TimelineEvent[];
 };
 
+const formatDate = (dateString: string): string => {
+  if (!dateString) return "";
+
+  // Extract year, making sure to handle negative years (BCE)
+  const year = parseInt(dateString, 10);
+
+  return year < 0 ? `${Math.abs(year)} A.C` : `${year} D.C`;
+};
 
 
 const TimelineComponent = ({ events }: TimelineProps) => {
-
   const timelineRef = useRef<HTMLDivElement | null>(null);
   const timelineInstance = useRef<Timeline | null>(null);
   const itemsRef = useRef<DataSet<TimelineEvent>>(new DataSet());
 
-  const [title,setTitle] = useState("")
-  const [description,setDescription] = useState("")
-
-
+  const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null);
 
   useEffect(() => {
     if (!timelineRef.current) return;
 
-    // ✅ Convert start dates to numbers (BCE are negative)
-    const parseYear = (dateString:string) => parseInt(dateString.split("-")[1]) * (dateString.startsWith("-") ? -1 : 1);
+    const parseYear = (dateString: string) => parseInt(dateString.split("-")[1]) * (dateString.startsWith("-") ? -1 : 1);
     const timestamps = events.map((e) => parseYear(e.start));
-    
-    // console.log(timestamps)
+
     const minDate = events[timestamps.indexOf(Math.min(...timestamps))].start;
     const maxDate = events[timestamps.indexOf(Math.max(...timestamps))].start;
 
     if (!timelineInstance.current) {
-      // Create Timeline once
       timelineInstance.current = new Timeline(timelineRef.current, itemsRef.current, {
         zoomable: true,
         start: minDate,
         end: maxDate,
-        min:minDate,
+        min: minDate,
         max: maxDate,
-        width: '100%',
-        height: '100%',
-      
-
+        width: "100%",
+        height: "100%",
       });
-      timelineInstance.current.on('select', function (properties) {
-        // console.log('selected items: ' + properties.items);
-        const id = Number(properties.items) ? Number(properties.items) : null
+
+      timelineInstance.current.on("select", function (properties) {
+        const id = Number(properties.items) ? Number(properties.items) : null;
         if (id) {
-            const result = events.filter(event=>event.id === id)
-            console.log(result[0].content,result[0].description)
-            setTitle(result[0].content)
-            if (result[0].description) setDescription(result[0].description)
+          const event = events.find((e) => e.id === id);
+          if (event) {
+            setSelectedEvent(event); // ✅ Update the selected event
+          }
         }
-
       });
-    } else {
-      // ✅ Update the timeline window dynamically
-    //   timelineInstance.current.setWindow(minDate,maxDate);
     }
 
-    // ✅ Use `setItems()` to update events dynamically
     itemsRef.current.clear();
     itemsRef.current.add(events);
-  }, [events]); // Runs whenever events change
+  }, [events]);
 
-  return <>
-    <div ref={timelineRef} style={{ height: "400px" }} />
-    
-    <div className="bg-gray-700 text-white p-10">
-        <h1 className="text-white text-3xl">{title}</h1>
-        <p>{description}</p>
-    </div>
-    <Map/>
-    </>;
+
+  const moveTimeline = (type: "left-extreme" | "right-extreme" | "left" | "right") => {
+    if (!timelineInstance.current) return;
+
+    const range = timelineInstance.current.getWindow();
+    const interval = range.end.getTime() - range.start.getTime();
+
+    switch (type) {
+      case "left-extreme":
+        timelineInstance.current.moveTo(events[0].start);
+        break;
+      case "right-extreme":
+        timelineInstance.current.moveTo(events[events.length - 1].start);
+        break;
+      case "left":
+        timelineInstance.current.setWindow(range.start.getTime() - interval * 0.5, range.end.getTime() - interval * 0.5);
+        break;
+      case "right":
+        timelineInstance.current.setWindow(range.start.getTime() + interval * 0.5, range.end.getTime() + interval * 0.5);
+        break;
+    }
+  };
+
+  return (
+    <>
+
+<ToggleGroup className="w-xl" type="single">
+  <ToggleGroupItem value="start" onClick={() => moveTimeline("left-extreme")}>{"<<"}</ToggleGroupItem>
+  <ToggleGroupItem value="left" onClick={() => moveTimeline("left")}>{"<"}</ToggleGroupItem>
+  <ToggleGroupItem value="right" onClick={() => moveTimeline("right")}>{">"}</ToggleGroupItem>
+  <ToggleGroupItem value="end" onClick={() => moveTimeline("right-extreme")}>{">>"}</ToggleGroupItem>
+</ToggleGroup>
+    {/* <div className="flex justify-between p-2">
+        <button onClick={() => moveTimeline("left-extreme")} className="px-4 py-2 bg-gray-700 text-white rounded">{"<<"}</button>
+        <button onClick={() => moveTimeline("left")} className="px-4 py-2 bg-gray-500 text-white rounded">{"<"}</button>
+        <button onClick={() => moveTimeline("right")} className="px-4 py-2 bg-gray-500 text-white rounded">{">"}</button>
+        <button onClick={() => moveTimeline("right-extreme")} className="px-4 py-2 bg-gray-700 text-white rounded">{">>"}</button>
+      </div> */}
+      <div ref={timelineRef} style={{ height: "400px" }} />
+
+      <ResizablePanelGroup direction="horizontal">
+      <ResizablePanel>
+  <div style={{ height: "500px", overflowY: "auto" }} className="p-10">
+    {selectedEvent ? (
+      <>
+        <h1 className="text-white text-3xl pb-2">{selectedEvent.content}</h1>
+        <Separator />
+
+        <p>{formatDate(selectedEvent.start)} {selectedEvent.end ? " - " + formatDate(selectedEvent.end) : ""}</p>
+
+        <p>{selectedEvent.description}</p>
+
+      </>
+    ) : (
+      <p>Seleziona un evento per visualizzare i dettagli</p>
+    )}
+  </div>
+</ResizablePanel>
+        <ResizableHandle withHandle />
+        <ResizablePanel>
+          <Map selectedEvent={selectedEvent} />
+        </ResizablePanel>
+      </ResizablePanelGroup>
+
+
+
+
+    </>
+  );
 };
 
 export default TimelineComponent;

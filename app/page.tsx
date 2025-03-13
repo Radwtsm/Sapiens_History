@@ -10,13 +10,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
+
+
+
 
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Filter events dynamically
-  const filteredEvents = selectedCategory
+  const filteredEvents : any = selectedCategory
     ? RawEvents.filter((event) => event.categories.includes(selectedCategory))
     : RawEvents;
 
