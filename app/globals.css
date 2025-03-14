@@ -162,3 +162,10 @@ body {
   font-weight: 400;
   font-style: normal;
 }
+
+
+.vis-item {
+  padding: 10px !important; /* Adjust padding */
+  border-radius: 5px; /* Optional: rounded corners */
+  line-height: 1.5; /* Improve readability */
+}

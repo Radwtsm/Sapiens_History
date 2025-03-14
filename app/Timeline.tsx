@@ -12,13 +12,14 @@ import {
 } from "@/components/ui/resizable"
 import { Separator } from "@/components/ui/separator"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-
+// import Script from "next/script";
+// import MapTime from "./MapTime";
 
 
 
 const Map = dynamic(() => import("./Map"), { ssr: false });
-
-type TimelineEvent = {
+// const Mappone = dynamic(() => import("./MapTime"), { ssr: false });
+export type TimelineEvent = {
   id: number;
   content: string;
   start: string;
@@ -27,6 +28,8 @@ type TimelineEvent = {
   position?: [number, number]; // ✅ Added position attribute [lat, lng]
   path?:[number, number][]
 };
+
+
 
 type TimelineProps = {
   events: TimelineEvent[];
@@ -144,7 +147,16 @@ const TimelineComponent = ({ events }: TimelineProps) => {
 </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel>
+        {/* <script src=""
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossOrigin="anonymous"
+     ></script> */}
+     <script async src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        {/* <Script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></Script> */}
+
+
           <Map selectedEvent={selectedEvent} />
+          {/* <Mappone selectedEvent={selectedEvent}/> */}
         </ResizablePanel>
       </ResizablePanelGroup>
 
